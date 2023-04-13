@@ -8,19 +8,24 @@ services:
     volumes:
       - ./server:/srv:cached
     working_dir: /srv
+    networks:
+      - db-network
     depends_on:
-      - mysql
-  mysql:
-    build: ./infra/mysql
-    environment:
-      - MYSQL_DATABASE=line_secretary
-      - MYSQL_ROOT_USER=root
-      - MYSQL_ROOT_PASSWORD=root@pass@3559
-      - TZ=Uapan
+      - db
+  db:
+    container_name: myDB
+    build: ./infra/postgres
     volumes:
-      - db-store:var/lib/mysql
+      - db-store:/var/lib/postgres
+      - ./initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_DB=line_secretary
+      - POSTGRES_PASSWORD=root@pass@1995
     ports:
-      - "3306:3306"
-
+      - "5432:5432"
+    networks:
+    - db-network
+networks:
+  db-network:
 volumes:
   db-store:

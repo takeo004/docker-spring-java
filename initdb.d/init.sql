@@ -1,0 +1,4 @@
+CREATE USER admin WITH PASSWORD 'admin@pass@1995';
+ALTER USER admin CREATEDB;
+GRANT ALL PRIVILEGES ON DATABASE line_secretary TO admin;
+GRANT USAGE ON SCHEMA public TO admin;

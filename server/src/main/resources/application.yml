@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://myDB:5432/line_secretary
+    username: admin
+    password: admin@pass@1995
+  jpa:
+    database-platform : org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+  flyway:
+    enabled: true
+    schemas: line_secretary
