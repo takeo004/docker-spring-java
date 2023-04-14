@@ -2,23 +2,24 @@ version: '3.6'
 services:
   app:
     image: eclipse-temurin:17
+    privileged: true # 最強権限らしいのでほかの方法が知りたい
     ports:
       - 8080:8080
     tty: true
     volumes:
-      - ./server:/srv:cached
+      - ./server:/srv
     working_dir: /srv
     networks:
       - db-network
     depends_on:
       - db
   db:
-    container_name: myDB
-    build: ./infra/postgres
+    image: postgres:15.0-alpine
     volumes:
       - db-store:/var/lib/postgres
       - ./initdb.d:/docker-entrypoint-initdb.d
     environment:
+      - LANG=ja_JP.utf8
       - POSTGRES_DB=line_secretary
       - POSTGRES_PASSWORD=root@pass@1995
     ports:
