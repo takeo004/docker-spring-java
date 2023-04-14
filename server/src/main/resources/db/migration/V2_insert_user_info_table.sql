@@ -1,1 +1,0 @@
-INSERT INTO USER_INFO(USER_NAME) VALUES('てんま');flyway_schema_history

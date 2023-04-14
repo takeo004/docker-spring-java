@@ -24,8 +24,9 @@ services:
     ports:
       - "5432:5432"
     networks:
-    - db-network
+      db-network:
 networks:
   db-network:
+    driver: bridge
 volumes:
   db-store:
