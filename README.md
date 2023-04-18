@@ -29,6 +29,20 @@ make create-machine e=stg
 make create-machine e=prod
 ```
 
+### 仮想環境にリポジトリをプル（仮想環境を立てずにローカルでコンテナを起動する場合は、実施不要）
+1. 仮想間環境にssh
+```
+docker-machine (hypervの場合：--native-ssh) ssh line-secretary(-stg)
+```
+2. 仮想環境上で [リポジトリ](https://github.com/takeo004/line-secretary) をプル
+```
+git clone https://github.com/takeo004/line-secretary.git
+```
+3. 仮想環境を出る
+```
+exit
+```
+
 ### 操作対象変更（仮想環境を立てない場合は、実施不要）
 ```
 docker-machine env line-secretary(-stg) | Invoke-Expression
