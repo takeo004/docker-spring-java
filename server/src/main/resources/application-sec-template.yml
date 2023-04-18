@@ -6,3 +6,5 @@ line.bot:
     channel-token: 
     channel-secret: 
     handler.path: 
+chatgpt:
+    token: 
