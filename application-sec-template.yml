@@ -5,4 +5,4 @@ spring:
 line.bot:
     channel-token:
     channel-secret:
-    handler.path: test
+    handler.path:
