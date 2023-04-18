@@ -35,9 +35,12 @@ docker-machine env line-secretary(-stg) | Invoke-Expression
 ```
 
 ### コンテナ起動
+#### 環境説明
 dev = ローカル上にコンテナを作成する場合\
 stg = ローカル上に立てたhypervの仮想マシン上にコンテナを作成する場合\
 prod = ec2に立てた仮想マシン上にコンテナを作成する場合\
+
+#### 手順
 1. docker-composeのbuild
 ```
 make build e=dev/stg/prod
