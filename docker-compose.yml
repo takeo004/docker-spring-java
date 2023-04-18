@@ -6,13 +6,6 @@ services:
     ports:
       - 8080:8080
     tty: true
-    volumes: # この切り替え方式なんとかしたい
-      # hypervのdocker-machine上で動かす場合
-      # - /home/docker/docker-spring-java/server:/srv:cached
-      # amazonec2でAMI=ami-00bc9b7f0e98dc134 (ubuntu)で実行する場合
-      - /home/ubuntu/docker-spring-java/server:/srv:cached
-      # ローカル直で動かす場合
-      # - ./server:/srv:cached
     working_dir: /srv
     networks:
       - db-network
@@ -20,14 +13,6 @@ services:
       - db
   db:
     image: postgres:15.0-alpine
-    volumes: # この切り替え方式なんとかしたい
-      - db-store:/var/lib/postgres
-      # hypervのdocker-machine上で動かす場合
-      # - /home/docker/docker-spring-java/initdb.d:/docker-entrypoint-initdb.d
-      # amazonec2でAMI=ami-00bc9b7f0e98dc134 (ubuntu)で実行する場合
-      - /home/ubuntu/docker-spring-java/initdb.d:/docker-entrypoint-initdb.d
-      # ローカル直で動かす場合
-      # - ./initdb.d:/docker-entrypoint-initdb.d
     environment:
       - LANG=ja_JP.utf8
       - POSTGRES_DB=line_secretary
