@@ -1,6 +1,7 @@
 spring:
-    username:
-    password:
+    datasource:
+        username: 
+        password:
 line.bot:
     channel-token:
     channel-secret:
