@@ -22,7 +22,6 @@ public class ChatGptRepository {
     }
     
     public String requestChatGpt(List<ChatMessage> messageList, int maxTokens, double temperature) throws Exception {
-        token = "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";
         OpenAiService service = new OpenAiService(token, Duration.ofSeconds(30));
 
         ChatCompletionRequest request = ChatCompletionRequest.builder()
