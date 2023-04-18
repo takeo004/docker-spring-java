@@ -3,9 +3,9 @@ services:
   app:
     volumes:
       # amazonec2でAMI=ami-00bc9b7f0e98dc134 (ubuntu)で実行する場合
-      - /home/ubuntu/docker-spring-java/server:/srv:cached
+      - /home/ubuntu/line-secretary/server:/srv:cached
   db:
     volumes:
       - db-store:/var/lib/postgres
       # amazonec2でAMI=ami-00bc9b7f0e98dc134 (ubuntu)で実行する場合
-      - /home/ubuntu/docker-spring-java/initdb.d:/docker-entrypoint-initdb.d
+      - /home/ubuntu/line-secretary/initdb.d:/docker-entrypoint-initdb.d

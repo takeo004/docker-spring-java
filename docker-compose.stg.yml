@@ -3,9 +3,9 @@ services:
   app:
     volumes:
       # hypervのdocker-machine上で動かす場合
-      - /home/docker/docker-spring-java/server:/srv:cached
+      - /home/docker/line-secretary/server:/srv:cached
   db:
     volumes:
       - db-store:/var/lib/postgres
       # hypervのdocker-machine上で動かす場合
-      - /home/docker/docker-spring-java/initdb.d:/docker-entrypoint-initdb.d
+      - /home/docker/line-secretary/initdb.d:/docker-entrypoint-initdb.d
