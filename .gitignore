@@ -1,0 +1,3 @@
+.vscode/
+application-sec.yml
+initdb.d/init.sql
