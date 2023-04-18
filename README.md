@@ -72,3 +72,6 @@ docker-machine ssh line-secretary
 
 ### LINEのWebhook設定について
 EC2環境の場合は、IPアドレスを直でLINEのWebhookに設定してあげればよいかと思うのですが、ローカルでコンテナ起動した場合や、ローカルに仮想環境を立てた場合は [こちら](https://qiita.com/Esfahan/items/74e71edfe17d9935d47e) を参考に、外部にポート解放することで、LINEのWebhookにひっかけることができるかと思います。（セキュリティ的にはあまりよろしくなさそう）
+
+### makeコマンドについて
+実際に実行している処理は、Makefileに記載しているので、気になったら参考にしてください
