@@ -37,14 +37,12 @@ exit
 docker-machine (hypervの場合：--native-ssh) ssh line-secretary(-stg)
 ```
 #### init.sql
-1. *initdb.d* ディレクトリに配置されている、*init-template.sql* を同ディレクトリにコピーする
-2. ファイル名を *init.sql* に変更する
-3. ユーザー名とパスワードを記載する
+1. *initdb.d* ディレクトリに配置されている、*init.sql* の *username* と *userpassword* を変更する
 
 #### application-sec.yml
-1. 直下にある *application-sec-template.yml* を直下にコピーする
+1. *server/src/main/resources* にある *application-sec-template.yml* を同ディレクトリにコピーする
 2. ファイル名を *application-sec.yml* に変更する
-3. 設定値ヲ入力する
+3. 設定値を入力する
 ### 操作対象変更（仮想環境を立てない場合は、実施不要）
 ```
 docker-machine env line-secretary(-stg) | Invoke-Expression
@@ -77,7 +75,7 @@ sh gradlew build
 ```
 3. アプリケーションの起動
 ```
-java -jar build/libs/(jarの名前：tabキー押せば出ます)
+java -classpath -jar build/libs/(jarの名前：tabキー押せば出ます)
 ```
 
 ## 補足
