@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.api.entity.UserInfo;
-import com.example.api.repository.UserInfoRepository;
+import com.example.api.repository.db.UserInfoRepository;
 
 @Service
 public class UserInfoService {
