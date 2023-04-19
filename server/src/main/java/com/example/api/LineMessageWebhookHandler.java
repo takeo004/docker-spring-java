@@ -11,8 +11,11 @@ import com.example.api.controller.request.LineRequestBase;
 import com.example.api.controller.request.LineScheduleDeleteRequest;
 import com.example.api.controller.request.LineScheduleRegistRequest;
 import com.example.api.controller.request.LineScheduleSearchRequest;
+import com.example.api.entity.UserInfo;
+import com.example.api.service.AdminService;
 import com.example.api.service.ChatGptService;
 import com.example.api.service.LineMessageService;
+import com.example.api.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -30,14 +33,30 @@ public class LineMessageWebhookHandler {
     @Autowired
     private LineMessageService lineMessageService;
     @Autowired
+    private UserService userService;
+    @Autowired
+    private AdminService adminService;
+    @Autowired
     private ChatGptService chatGptService;
 
 
     @EventMapping
     public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) throws Exception {
         TextMessageContent message = event.getMessage();
-
+        UserInfo userInfo = userService.findUserByLineUserId(event.getSource().getUserId());
         
+        if(userInfo == null) {
+            lineMessageService.replyLineMessage(event.getReplyToken(),  userService.initUser(event.getSource().getUserId(), message.getText()));
+            return;
+        }
+
+        if(message.getText().startsWith("--")) {
+            String adminResponse = adminService.adminProcess(message.getText(), userInfo);
+            if(adminResponse != null) {
+                lineMessageService.replyLineMessage(event.getReplyToken(), adminResponse);
+                return;
+            }
+        }
 
         String chatGptResponse = chatGptService.checkMethodForrequestMessage(message.getText());
         LineRequestBase request = this.generateLineRequest(chatGptResponse);
@@ -47,8 +66,6 @@ public class LineMessageWebhookHandler {
             lineMessageService.replyLineMessage(event.getReplyToken(), chatGptResponse);
             return;
         }
-
-
 
         /**
          * テスト用なので後で消す！！
