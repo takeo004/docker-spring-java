@@ -1,16 +1,13 @@
 package com.example.api;
 
-import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import com.example.api.constant.MethodDetailType;
 import com.example.api.constant.MethodType;
-import com.example.api.controller.request.LineRequestBase;
-import com.example.api.controller.request.googlecalendar.GoogleCalendarDeleteRequest;
-import com.example.api.controller.request.googlecalendar.GoogleCalendarRegistRequest;
-import com.example.api.controller.request.googlecalendar.GoogleCalendarSearchRequest;
 import com.example.api.entity.UserInfo;
 import com.example.api.service.AdminService;
 import com.example.api.service.ChatGptService;
@@ -18,10 +15,8 @@ import com.example.api.service.LineMessageService;
 import com.example.api.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
@@ -29,6 +24,9 @@ import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 
 @LineMessageHandler
 public class LineMessageWebhookHandler {
+
+    @Autowired
+    private ApplicationContext context;
     
     @Autowired
     private LineMessageService lineMessageService;
@@ -46,41 +44,42 @@ public class LineMessageWebhookHandler {
         UserInfo userInfo = userService.findUserByLineUserId(event.getSource().getUserId());
         
         if(userInfo == null) {
+            // ユーザー情報が取得できない場合は初期設定を行う
             lineMessageService.replyLineMessage(event.getReplyToken(),  userService.initUser(event.getSource().getUserId(), message.getText()));
             return;
         }
 
         if(message.getText().startsWith("--")) {
+            // 管理用コマンドが入力された場合は、専用の処理を実行
             String adminResponse = adminService.adminProcess(message.getText(), userInfo);
             if(adminResponse != null) {
+                // 管理者かつ存在するコマンドが入力されていた場合はその結果を返す
                 lineMessageService.replyLineMessage(event.getReplyToken(), adminResponse);
                 return;
             }
         }
 
+        // chatGPTをつかって、メッセージから処理内容を判定
         String chatGptResponse = chatGptService.checkMethodForrequestMessage(message.getText());
-        LineRequestBase request = this.generateLineRequest(chatGptResponse);
-
-        if(request == null) {
-            // システムで用意した機能外として、chatGptの回答をそのまま返信する
+        
+        MethodDetailType type = this.generateRequestMethod(chatGptResponse);
+        if(type == null) {
+            // 用意した機能外として、chatGptの回答をそのまま返信する（普通の会話になる想定）
             lineMessageService.replyLineMessage(event.getReplyToken(), chatGptResponse);
             return;
         }
 
-        /**
-         * テスト用なので後で消す！！
-         */
-        StringWriter writer = new StringWriter();
-        new ObjectMapper()
-        .registerModule(new JavaTimeModule()) // JSR-310 サポート
-        .writerWithDefaultPrettyPrinter() // 読みやすく整形
-        .writeValue(writer, request);
+        // リフレクションでコントローラと対象のメソッドを呼び出す
+        Object classes = context.getBean(type.getMethod().getControllerName());
+        Method method = classes.getClass().getMethod(type.getMethodName(), MethodDetailType.class, String.class, UserInfo.class);
 
-        // 返信
-        lineMessageService.replyLineMessage(event.getReplyToken(), writer.toString());
+        String response = method.invoke(classes, type, chatGptResponse, userInfo).toString();
+        
+        // コントローラの返却値をそのまま返信する
+        lineMessageService.replyLineMessage(event.getReplyToken(), response);
     }
 
-    private LineRequestBase generateLineRequest(String chatGptResponse) throws JsonMappingException, JsonProcessingException {
+    private MethodDetailType generateRequestMethod(String chatGptResponse) throws JsonMappingException, JsonProcessingException {
         if(!chatGptResponse.contains("{\"method\":")) {
             return null;
         }
@@ -94,33 +93,6 @@ public class LineMessageWebhookHandler {
         }
 
         MethodDetailType methodDetailType = MethodDetailType.of(methodType, requestMap.get("methodDetail"));
-        LineRequestBase request;
-        switch(methodDetailType.getMethod()) {
-            case SCHEDULE:
-                request = this.generateLineScheduleRequestBase(methodDetailType, chatGptResponse);
-                break;
-            default:
-                return null;
-        }
-        
-        request.setMethodDetailType(methodDetailType);
-        return request;
-    }
-
-    private LineRequestBase generateLineScheduleRequestBase(MethodDetailType methodDetailType, String chatGptResponse) throws JsonMappingException, JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        switch(methodDetailType) {
-            case SCHEDULE_REGIST:
-                return mapper.readValue(chatGptResponse, GoogleCalendarRegistRequest.class);
-            case SCHEDULE_SEARCH:
-                return mapper.readValue(chatGptResponse, GoogleCalendarSearchRequest.class);
-            case SCHEDULE_DELETE:
-                return mapper.readValue(chatGptResponse, GoogleCalendarDeleteRequest.class);
-            default:
-                return null;
-        }
+        return methodDetailType;
     }
 }

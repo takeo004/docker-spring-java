@@ -1,7 +1,5 @@
 package com.example.api.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +37,5 @@ public class UserService {
                 return "初期設定が完了しました！";
             }
         }
-
     }
 }
