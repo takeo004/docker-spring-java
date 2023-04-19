@@ -1,11 +1,11 @@
-package com.example.api.controller.request;
+package com.example.api.controller.request.googlecalendar;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class LineScheduleDeleteRequest extends LineScheduleRequestBase {
+public class GoogleCalendarRegistRequest extends GoogleCalendarRequestBase {
 
     /**
      * 予定のタイトル

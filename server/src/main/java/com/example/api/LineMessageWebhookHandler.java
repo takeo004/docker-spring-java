@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.example.api.constant.MethodDetailType;
 import com.example.api.constant.MethodType;
 import com.example.api.controller.request.LineRequestBase;
-import com.example.api.controller.request.LineScheduleDeleteRequest;
-import com.example.api.controller.request.LineScheduleRegistRequest;
-import com.example.api.controller.request.LineScheduleSearchRequest;
+import com.example.api.controller.request.googlecalendar.GoogleCalendarDeleteRequest;
+import com.example.api.controller.request.googlecalendar.GoogleCalendarRegistRequest;
+import com.example.api.controller.request.googlecalendar.GoogleCalendarSearchRequest;
 import com.example.api.entity.UserInfo;
 import com.example.api.service.AdminService;
 import com.example.api.service.ChatGptService;
@@ -114,11 +114,11 @@ public class LineMessageWebhookHandler {
 
         switch(methodDetailType) {
             case SCHEDULE_REGIST:
-                return mapper.readValue(chatGptResponse, LineScheduleRegistRequest.class);
+                return mapper.readValue(chatGptResponse, GoogleCalendarRegistRequest.class);
             case SCHEDULE_SEARCH:
-                return mapper.readValue(chatGptResponse, LineScheduleSearchRequest.class);
+                return mapper.readValue(chatGptResponse, GoogleCalendarSearchRequest.class);
             case SCHEDULE_DELETE:
-                return mapper.readValue(chatGptResponse, LineScheduleDeleteRequest.class);
+                return mapper.readValue(chatGptResponse, GoogleCalendarDeleteRequest.class);
             default:
                 return null;
         }

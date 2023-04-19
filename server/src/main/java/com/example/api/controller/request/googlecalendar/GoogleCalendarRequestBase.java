@@ -1,7 +1,8 @@
-package com.example.api.controller.request;
+package com.example.api.controller.request.googlecalendar;
 
 import java.util.Date;
 
+import com.example.api.controller.request.LineRequestBase;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
@@ -10,7 +11,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class LineScheduleRequestBase extends LineRequestBase {
+public class GoogleCalendarRequestBase extends LineRequestBase {
     
     /**
      * 予定開始日
