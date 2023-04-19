@@ -44,11 +44,11 @@ public class ChatGptService {
         messageList.add(new ChatMessage(ChatMessageRole.USER.value(), new StringBuilder()
         .append("質問の内容に合わせて、以下で示す形式で回答してください。\n")
         .append("予定の追加もしくは登録の場合:")
-        .append("[json]{\"method\": \"1\", \"methodDetail\": \"1\", \"title\": \"タイトル\", \"startDate\": \"yyyy/mm/dd\", \"endDate\": \"yyyy/mm/dd\"}[json]\n")
+        .append("[json]{\"method\": \"1\", \"methodDetail\": \"1\", \"title\": \"タイトル\", \"startDate\": \"yyyy-mm-dd\", \"endDate\": \"yyyy-mm-dd\"}[json]\n")
         .append("予定を教えてほしい場合:")
-        .append("[json]{\"method\": \"1\", \"methodDetail\": \"2\", \"startDate\": \"yyyy/mm/dd\", \"endDate\": \"yyyy/mm/dd\"}[json]\n")
+        .append("[json]{\"method\": \"1\", \"methodDetail\": \"2\", \"startDate\": \"yyyy-mm-dd\", \"endDate\": \"yyyy-mm-dd\"}[json]\n")
         .append("予定の削除の場合：")
-        .append("[json]{\"method\": \"1\", \"methodDetail\": \"3\", \"title\": \"タイトル\", \"startDate\": \"yyyy/mm/dd\", \"endDate\": \"yyyy/mm/dd\"}[json]\n")
+        .append("[json]{\"method\": \"1\", \"methodDetail\": \"3\", \"title\": \"タイトル\", \"startDate\": \"yyyy-mm-dd\", \"endDate\": \"yyyy-mm-dd\"}[json]\n")
         .toString()));        
     }
 

@@ -9,3 +9,9 @@ spring:
     database-platform : org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+line.bot:
+    handler.path: /callback
+google-calendar:
+  path:
+    credential: ./google-calendar-credentials.json
+    # credential: C:\\Users\\user\\workspace\\docker-spring-java\\server\\src\\main\\resources\\google-calendar-credentials.json

@@ -16,12 +16,12 @@ public class GoogleCalendarRequestBase extends LineRequestBase {
     /**
      * 予定開始日
      */
-    @JsonFormat(pattern = "yyyy/mm/dd", timezone = "Asia/Tokyo")
+    @JsonFormat(pattern = "yyyy-mm-dd", timezone = "Asia/Tokyo")
     private Date startDate;
 
     /**
      * 予定終了日
      */
-    @JsonFormat(pattern = "yyyy/mm/dd", timezone = "Asia/Tokyo")
+    @JsonFormat(pattern = "yyyy-mm-dd", timezone = "Asia/Tokyo")
     private String endDate;
 }
