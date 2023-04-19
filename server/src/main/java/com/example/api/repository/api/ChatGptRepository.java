@@ -1,4 +1,4 @@
-package com.example.api.repository;
+package com.example.api.repository.api;
 
 import java.time.Duration;
 import java.util.List;
