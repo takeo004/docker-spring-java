@@ -9,7 +9,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.api.repository.ChatGptRepository;
+import com.example.api.repository.api.ChatGptRepository;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 
@@ -36,18 +36,19 @@ public class ChatGptService {
 
     private void generateBaseCheckMethodMessage(List<ChatMessage> messageList) {
         messageList.add(new ChatMessage(ChatMessageRole.USER.value(), new StringBuilder()
-        .append("「先々月」「先月」「先々週」「先週」「一昨日」「機能」「明日」「明後日」「来週」「再来週」「来月」「再来月」は、")
+        .append("日付を指定された場合はその日付を使用してください。\n")
+        .append("「先々月」「先月」「先々週」「先週」「一昨日」「機能」「明日」「明後日」「来週」「再来週」「来月」「再来月」が渡された場合は、")
         .append(this.formatDate(new Date()))
         .append("を基準日として、判定してください。")
         .toString()));
         messageList.add(new ChatMessage(ChatMessageRole.USER.value(), new StringBuilder()
         .append("質問の内容に合わせて、以下で示す形式で回答してください。\n")
         .append("予定の追加もしくは登録の場合:")
-        .append("[json]{\"method\": 1, \"title\": \"タイトル\", \"startDate\": \"yyyy/mm/dd\", \"endDate\": \"yyyy/mm/dd\"}[json]\n")
+        .append("[json]{\"method\": \"1\", \"methodDetail\": \"1\", \"title\": \"タイトル\", \"startDate\": \"yyyy/mm/dd\", \"endDate\": \"yyyy/mm/dd\"}[json]\n")
         .append("予定を教えてほしい場合:")
-        .append("[json]{\"method\": 2 \"startDate\": \"yyyy/mm/dd\", \"endDate\": \"yyyy/mm/dd\"}[json]\n")
+        .append("[json]{\"method\": \"1\", \"methodDetail\": \"2\", \"startDate\": \"yyyy/mm/dd\", \"endDate\": \"yyyy/mm/dd\"}[json]\n")
         .append("予定の削除の場合：")
-        .append("[json]{\"method\": 3, \"title\": \"タイトル\", \"startDate\": \"yyyy/mm/dd\", \"endDate\": \"yyyy/mm/dd\"}[json]\n")
+        .append("[json]{\"method\": \"1\", \"methodDetail\": \"3\", \"title\": \"タイトル\", \"startDate\": \"yyyy/mm/dd\", \"endDate\": \"yyyy/mm/dd\"}[json]\n")
         .toString()));        
     }
 
