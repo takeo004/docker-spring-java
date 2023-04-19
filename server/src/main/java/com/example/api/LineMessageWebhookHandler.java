@@ -12,17 +12,15 @@ import com.example.api.controller.request.LineScheduleDeleteRequest;
 import com.example.api.controller.request.LineScheduleRegistRequest;
 import com.example.api.controller.request.LineScheduleSearchRequest;
 import com.example.api.service.ChatGptService;
+import com.example.api.service.LineMessageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.linecorp.bot.client.LineMessagingClient;
-import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
-import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 
@@ -30,24 +28,31 @@ import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 public class LineMessageWebhookHandler {
     
     @Autowired
-    private LineMessagingClient lineMessagingClient;
+    private LineMessageService lineMessageService;
     @Autowired
     private ChatGptService chatGptService;
+
 
     @EventMapping
     public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) throws Exception {
         TextMessageContent message = event.getMessage();
+
+        
 
         String chatGptResponse = chatGptService.checkMethodForrequestMessage(message.getText());
         LineRequestBase request = this.generateLineRequest(chatGptResponse);
 
         if(request == null) {
             // システムで用意した機能外として、chatGptの回答をそのまま返信する
-            lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(chatGptResponse), true)).get();
+            lineMessageService.replyLineMessage(event.getReplyToken(), chatGptResponse);
             return;
         }
 
-        // テスト用
+
+
+        /**
+         * テスト用なので後で消す！！
+         */
         StringWriter writer = new StringWriter();
         new ObjectMapper()
         .registerModule(new JavaTimeModule()) // JSR-310 サポート
@@ -55,7 +60,7 @@ public class LineMessageWebhookHandler {
         .writeValue(writer, request);
 
         // 返信
-        lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(writer.toString()), true)).get();
+        lineMessageService.replyLineMessage(event.getReplyToken(), writer.toString());
     }
 
     private LineRequestBase generateLineRequest(String chatGptResponse) throws JsonMappingException, JsonProcessingException {
