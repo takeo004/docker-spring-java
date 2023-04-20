@@ -96,3 +96,35 @@ EC2環境の場合は、IPアドレスを直でLINEのWebhookに設定してあ�
 
 ### makeコマンドについて
 実際に実行している処理は、Makefileに記載しているので、気になったら参考にしてください
+
+### 実装について
+#### 基本
+機能を追加する場合は、[コントローラ](https://github.com/takeo004/line-secretary/tree/master/server/src/main/java/com/example/api/controller)、[サービス](https://github.com/takeo004/line-secretary/tree/master/server/src/main/java/com/example/api/service)、[リポジトリ](https://github.com/takeo004/line-secretary/tree/master/server/src/main/java/com/example/api/repository)、を追加もしくは修正してください。
+
+#### コントローラについて
+基本的にLINEから来たリクエストをいい感じに、リフレクションでコントローラに振り分けています。（ちょっときもいのでほかのやり方があれば教えてほしい）
+コントローラを追加する場合に修正が必要なクラスは以下になります。
+- [ChatGptService](https://github.com/takeo004/line-secretary/blob/2b4867d43e008ad8567784f090b65eb0eddc8ec1/server/src/main/java/com/example/api/service/ChatGptService.java#L58)
+    - chatGPTにリクエストの文章を読み込ませて、json型で内容を整理してもらっています。<br>
+    機能を追加する場合は、このjsonの形式を指定してあげる必要があります。<br>
+    基本的には形式は自由ですが、一番最初の *method* と *methodDetail* は形式を変えないようにして、新たに採番してあげてください。
+- [MethodType](https://github.com/takeo004/line-secretary/blob/master/server/src/main/java/com/example/api/constant/MethodType.java)
+    - Enum形式で処理内容の大枠を定義しています。（例：予定管理機能を「SCHEDULE」として定義しています。）<br>
+    - *method* には、jsonの形式を指定した際に設定したmethodを入れてあげてください。
+    - *controllerName* には、処理対象になるコントローラクラスのクラス名を、頭文字小文字のキャメルケースで設定してください。（リフレクションに使います）
+- [MethodDetailType](https://github.com/takeo004/line-secretary/blob/master/server/src/main/java/com/example/api/constant/MethodDetailType.java)
+    - Enum形式で処理内容の詳細を定義しています。（例：予定登録を「SCHEDULE_REGIST」として定義しています。）<br>
+    - *method* には、MethodTypeを設定してあげてください。
+    - *methodDetail* には、jsonの形式を指定した際に設定した *methodDetail* を設定してあげてください。
+    - *methodName* には、コントローラに定義したメソッド名を記載してください。
+    - *requestClass* には、その処理用に用意したリクエストクラスのClassオブジェクトを渡してあげてください。
+コントローラを作成する場合は、[BaseController](https://github.com/takeo004/line-secretary/blob/master/server/src/main/java/com/example/api/controller/BaseController.java) を継承してください。<br>
+メソッドを作成した場合は、最初に [super.generateRequest](https://github.com/takeo004/line-secretary/blob/2b4867d43e008ad8567784f090b65eb0eddc8ec1/server/src/main/java/com/example/api/controller/BaseController.java#L21) を呼び出して、リクエストクラスを初期化してください。
+
+#### 処理の一時中断について
+処理の途中で一度ユーザーに入力を求める場合、一旦情報を退避する用のテーブルとして、[UserState](https://github.com/takeo004/line-secretary/blob/master/server/src/main/java/com/example/api/entity/UserState.java) テーブルを用意しています。<br>
+LINEでメッセージが送られた際に、対象のユーザーのレコードがこのテーブルにあった場合は、[ProcessContinueHandler](https://github.com/takeo004/line-secretary/blob/master/server/src/main/java/com/example/api/handler/ProcessContinueHandler.java) をに処理が飛ぶので、ここのswitch文に処理を記載して、サービスを呼び出すなどして旨い事やってください<br>
+*UserState* があれば、とりあえずこのハンドラーに飛んでくるので、中断する時にレコードを追加、処理が終わったらレコードを削除を徹底してください。
+
+#### DBアクセスについて
+*JPA* を使っています。「[java jpa](https://www.google.com/search?q=java+jpa&rlz=1C1TKQJ_jaJP1020JP1020&sxsrf=APwXEde8cqYcvxH60dABaIf0OXHFlDTvCQ%3A1681994070932&ei=VjFBZN3COIyN-AbinJjoDg&ved=0ahUKEwjdxfKYvLj-AhWMBt4KHWIOBu0Q4dUDCA8&uact=5&oq=java+jpa&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIECCMQJzIECCMQJzIHCAAQigUQQzIFCAAQgAQyBQgAEIAEMgUIABCABDIFCAAQgAQyBQgAEIAEMgUIABCABDIFCAAQgAQ6CggAEEcQ1gQQsANKBAhBGABQjgZYjgZgmQpoAXAAeACAAbcBiAG3AZIBAzAuMZgBAKABAqABAcgBCsABAQ&sclient=gws-wiz-serp)」で検索してください。
