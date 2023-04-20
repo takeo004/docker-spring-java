@@ -1,22 +1,35 @@
 package com.example.api.service;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.api.constant.AdminProcess;
+import com.example.api.constant.State;
+import com.example.api.entity.GoogleUserInfo;
 import com.example.api.entity.UserInfo;
+import com.example.api.entity.UserState;
+import com.example.api.repository.db.GoogleUserInfoRepository;
 import com.example.api.repository.db.UserInfoRepository;
+import com.example.api.repository.db.UserStateRepository;
 
 @Service
 public class AdminService {
 
     @Autowired
+    private ChatGptService chatGptService;
+
+    @Autowired
     private UserInfoRepository userInfoRepository;
+    @Autowired
+    private UserStateRepository userStateRepository;
+    @Autowired
+    private GoogleUserInfoRepository googleUserInfoRepository;
     
-    public String adminProcess(String message, UserInfo adminUserInfo) {
+    public String adminProcess(String message, UserInfo adminUserInfo) throws Exception {
         String response = null;
         if(!adminUserInfo.isAdminFlg()) {
             return response;
@@ -25,7 +38,7 @@ public class AdminService {
         } else if (message.startsWith(AdminProcess.CREATE_USER.getPrefix())) {
             response = this.createUser(message);
         } else if (message.startsWith(AdminProcess.SET_CALENDER_ID.getPrefix())) {
-            response = this.setCalenderId(message);
+            response = this.setCalenderId(message, adminUserInfo);
         }
         return response;        
     }
@@ -48,17 +61,57 @@ public class AdminService {
         return message.concat(" で新規ユーザーを登録しました。");
     }
 
-    public String setCalenderId(String message) {
-        message = message.replace(AdminProcess.SET_CALENDER_ID.getPrefix(), "");
-        List<String> commands = Arrays.asList(message.split(" "));
+    public String setCalenderId(String message, UserInfo userInfo) throws Exception {
+        return this.setCalenderId(message, userInfo, null);
+    }
 
-        if(commands.size() != 2) {
-            return "コマンドに不備があります。".concat(AdminProcess.SET_CALENDER_ID.getPrefix()).concat("[username] [calenderId]");
+    public String setCalenderId(String message, UserInfo userInfo, UserState userState) throws Exception {
+
+        if(userState != null && !chatGptService.messageIsYes(message)) {
+            userStateRepository.delete(userState);
+            return "承知しました！処理を中断します！";
         }
 
-        String userName = commands.get(0);
-        String calenderId = commands.get(1);
-        // カレンダー登録処理
-        return "カレンダーIDの登録処理はまだ未実装！";
+        String userName;
+        String calenderId;
+        if(userState == null) {
+            message = message.replace(AdminProcess.SET_CALENDER_ID.getPrefix(), "");
+            List<String> commands = Arrays.asList(message.split(" "));
+    
+            if(commands.size() != 2) {
+                return "コマンドに不備があります。".concat(AdminProcess.SET_CALENDER_ID.getPrefix()).concat("[username] [calenderId]");
+            }
+            userName = commands.get(0);
+            calenderId = commands.get(1);
+        } else {
+            List<String> notes = Arrays.asList(userState.getNote().split(","));
+            userName = notes.get(0);
+            calenderId = notes.get(1);
+        }
+
+        UserInfo targetUserInfo = userInfoRepository.findByUserName(userName);
+        if(targetUserInfo == null) {
+            return "存在しないusernameです。";
+        }
+        
+        GoogleUserInfo googleUserInfo = googleUserInfoRepository.findById(targetUserInfo.getUserId()).orElse(new GoogleUserInfo());
+        if(userState == null && googleUserInfo.getCalendarId() != null) {
+            userStateRepository.save(new UserState(
+                userInfo.getUserId(),
+                State.SET_CALENDER_ID_CONFIRM.getState(),
+                State.SET_CALENDER_ID_CONFIRM.getDetail(),
+                targetUserInfo.getUserName().concat(",").concat(calenderId),
+                 new Date()));
+            return "既にカレンダーIDが設定されていますが、上書きしてもよろしいですか？\nカレンダーID：" + googleUserInfo.getCalendarId();
+        }
+
+        googleUserInfo.setUserId(targetUserInfo.getUserId());
+        googleUserInfo.setCalendarId(calenderId);
+        googleUserInfoRepository.save(googleUserInfo);
+
+        if(userState != null) {
+            userStateRepository.delete(userState);
+        }
+        return "カレンダーIDの登録が完了しました！";
     }
 }

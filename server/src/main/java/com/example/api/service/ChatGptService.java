@@ -16,8 +16,28 @@ import com.theokanning.openai.completion.chat.ChatMessageRole;
 @Service
 public class ChatGptService {
 
+    // 力技（もはやChatGptServiceの仕事じゃない）
+    private static final List<String> yesList = Arrays.asList("はい", "yes", "YES", "Yes", "お願い", "おねがい", "おねがいします", "お願いします", "よろしく", "よろしくお願いします", "よろしくおねがいします", "OK", "いいよ");
+    private static final List<String> noList = Arrays.asList("いいえ", "no", "NO", "No", "やめて", "だめ", "キャンセル", "キャンセルして", "中断", "中断して");
+
     @Autowired
     private ChatGptRepository repository;
+
+    public boolean messageIsYes(String requestMessage) throws Exception {
+        List<ChatMessage> messageList = new ArrayList<>();
+        // 一部確定で決まった動作をする返答を設定
+        if(yesList.contains(requestMessage)) {
+            return true;
+        } else if(noList.contains(requestMessage)) {
+            return false;
+        }
+
+        // 固定の回答でない場合はchatGPTに判定してもらう
+        messageList.add(new ChatMessage(ChatMessageRole.SYSTEM.value(), "次に入力する内容が承諾していると感じられる場合、またはポジティブな文章であればtrueを、それ以外の場合はfalseを返してください"));
+        messageList.add(new ChatMessage(ChatMessageRole.USER.value(), requestMessage));
+        String response = repository.requestChatGpt(messageList, 5, 0);
+        return Boolean.valueOf(response);
+    }
 
     public String checkMethodForrequestMessage(String requestMessage) throws Exception {
         List<ChatMessage> messageList = new ArrayList<>();
