@@ -23,7 +23,6 @@ public class ChatGptRepository {
     @Value("${chatgpt.retry-sleep-ms}")
     public long retrySleepMs;
 
-
     public String requestChatGpt(List<ChatMessage> messageList) throws Exception {
         return this.requestChatGpt(messageList, 150, 1d);
     }
