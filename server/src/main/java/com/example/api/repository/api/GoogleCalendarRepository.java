@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -23,6 +24,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.Events;
 import com.google.api.services.calendar.model.AclRule.Scope;
 import com.google.auth.Credentials;
 import com.google.auth.appengine.AppEngineCredentials;
@@ -57,10 +59,17 @@ public class GoogleCalendarRepository {
         return service.events().insert(googleUserInfo.getCalendarId(), event).execute();
     }
     
-        public void searchCalendarEvent(GoogleUserInfo googleUserInfo, GoogleCalendarSearchRequest request) throws IOException, GeneralSecurityException {
+        public List<Event> requestSearchEvent(GoogleUserInfo googleUserInfo, GoogleCalendarSearchRequest request) throws IOException, GeneralSecurityException {
             Calendar service = this.generateService();
     
-            // service.geteven
+            Events events = service.events().list(googleUserInfo.getCalendarId())
+                .setOrderBy("startTime")
+                .setSingleEvents(true)
+                .setTimeMin(new DateTime(request.getStartDate() + "T00:00:00Z"))
+                .setTimeMax(new DateTime(request.getEndDate() + "T23:59:59Z"))
+                .execute();
+
+            return events.getItems();
         }
 
     public void addCalendarRole(GoogleUserInfo googleUserInfo, String userEmail) throws IOException, GeneralSecurityException {

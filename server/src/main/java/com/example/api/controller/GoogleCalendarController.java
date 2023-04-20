@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import com.example.api.constant.MethodDetailType;
 import com.example.api.controller.request.googlecalendar.GoogleCalendarRegistRequest;
 import com.example.api.controller.request.googlecalendar.GoogleCalendarRequestBase;
+import com.example.api.controller.request.googlecalendar.GoogleCalendarSearchRequest;
 import com.example.api.entity.UserInfo;
 import com.example.api.service.GoogleCalendarService;
 
@@ -20,8 +21,11 @@ public class GoogleCalendarController<T extends GoogleCalendarRequestBase> exten
 
     public String registSchedule(MethodDetailType type, String chatGptResponse, UserInfo userInfo) throws IOException, GeneralSecurityException {
         GoogleCalendarRegistRequest request = (GoogleCalendarRegistRequest) super.generateRequest(type, chatGptResponse);
-
         return googleCalendarService.registSchedule(request, userInfo);
     }
 
+    public String searchSchedule(MethodDetailType type, String chatGptResponse, UserInfo userInfo) throws IOException, GeneralSecurityException {
+        GoogleCalendarSearchRequest request = (GoogleCalendarSearchRequest) super.generateRequest(type, chatGptResponse);
+        return googleCalendarService.searchSchedule(request, userInfo);
+    }
 }
