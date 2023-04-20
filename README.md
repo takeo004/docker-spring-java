@@ -43,6 +43,10 @@ docker-machine (hypervの場合：--native-ssh) ssh line-secretary(-stg)
 1. *server/src/main/resources* にある *application-sec-template.yml* を同ディレクトリにコピーする
 2. ファイル名を *application-sec.yml* に変更する
 3. 設定値を入力する
+
+### google-calendar-credentials.json
+1. [こちら ](https://qiita.com/ho-rai/items/df82e4fb2e46217e6f4e)の1.2.6までをもとに、GCPのアクセスキーをjson形式で取得する
+2. *serve/src/main/resources* 配下に配置して名前を *google-calendar-credentials.json* に変更する
 ### 操作対象変更（仮想環境を立てない場合は、実施不要）
 ```
 docker-machine env line-secretary(-stg) | Invoke-Expression
