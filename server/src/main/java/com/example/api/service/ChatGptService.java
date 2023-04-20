@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.api.entity.UserInfo;
 import com.example.api.repository.api.ChatGptRepository;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
@@ -23,7 +24,7 @@ public class ChatGptService {
     @Autowired
     private ChatGptRepository repository;
 
-    public boolean messageIsYes(String requestMessage) throws Exception {
+    public boolean messageIsYes(String requestMessage, UserInfo userInfo) throws Exception {
         List<ChatMessage> messageList = new ArrayList<>();
         // 一部確定で決まった動作をする返答を設定
         if(yesList.contains(requestMessage)) {
@@ -35,16 +36,16 @@ public class ChatGptService {
         // 固定の回答でない場合はchatGPTに判定してもらう
         messageList.add(new ChatMessage(ChatMessageRole.SYSTEM.value(), "次に入力する内容が承諾していると感じられる場合、またはポジティブな文章であればtrueを、それ以外の場合はfalseを返してください"));
         messageList.add(new ChatMessage(ChatMessageRole.USER.value(), requestMessage));
-        String response = repository.requestChatGpt(messageList, 5, 0);
+        String response = repository.requestChatGpt(messageList, userInfo, 5, 0);
         return Boolean.valueOf(response);
     }
 
-    public String checkMethodForrequestMessage(String requestMessage) throws Exception {
+    public String checkMethodForrequestMessage(String requestMessage, UserInfo userInfo) throws Exception {
         List<ChatMessage> messageList = new ArrayList<>();
         this.generateBaseCheckMethodMessage(messageList);
         messageList.add(new ChatMessage(ChatMessageRole.USER.value(), requestMessage));
 
-        String response = repository.requestChatGpt(messageList);
+        String response = repository.requestChatGpt(messageList, userInfo);
         if(response.contains("[json]{\"method\":")) {
             response = this.ignoreNotJson(response);
         } else {
