@@ -32,6 +32,10 @@ public class UserService {
         if(initState == null) {
             userInitStateRepository.save(new UserInitState(lineUserId));
             return "管理者が設定した名前を入力してください！";
+        } else if(userRepository.count() == 0l) {
+            userRepository.save(new UserInfo(0, message, lineUserId, true));
+            userInitStateRepository.delete(initState);
+            return "管理者として登録しました！おめでとう！";
         } else {
             UserInfo userInfo = userRepository.findByUserName(message);
             if(userInfo == null) {
@@ -41,7 +45,7 @@ public class UserService {
             } else {
                 userInfo.setLineUserId(lineUserId);
                 userRepository.save(userInfo);
-                userInitStateRepository.delete(userInitStateRepository.findByLineUserId(lineUserId));
+                userInitStateRepository.delete(initState);
                 return "初期設定が完了しました！";
             }
         }
