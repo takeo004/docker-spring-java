@@ -16,6 +16,8 @@ public class ProcessContinueHandler {
     public String handleContinueProcess(UserInfo userInfo, UserState userState, String message) throws Exception {
         State state = State.of(userState.getState(), userState.getStateDetail());
         switch(state) {
+            case SET_CALENDER_ID_CONFIRM:
+                return adminService.setCalenderId(message, userInfo, userState);
         }
         return "エラーが発生したよ！管理者に連絡してね！";
     }
