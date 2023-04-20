@@ -3,13 +3,17 @@ package com.example.api.repository.api;
 import java.time.Duration;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
+import com.example.api.entity.UserInfo;
+import com.example.api.service.LineMessageService;
 import com.theokanning.openai.OpenAiHttpException;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.service.OpenAiService;
+
 
 @Repository
 public class ChatGptRepository {
@@ -22,12 +26,15 @@ public class ChatGptRepository {
     public int maxRetry;
     @Value("${chatgpt.retry-sleep-ms}")
     public long retrySleepMs;
+    
+    @Autowired
+    public LineMessageService lineMessageService;
 
-    public String requestChatGpt(List<ChatMessage> messageList) throws Exception {
-        return this.requestChatGpt(messageList, 150, 1d);
+    public String requestChatGpt(List<ChatMessage> messageList, UserInfo userInfo) throws Exception {
+        return this.requestChatGpt(messageList, userInfo, 150, 1d);
     }
     
-    public String requestChatGpt(List<ChatMessage> messageList, int maxTokens, double temperature) throws Exception {
+    public String requestChatGpt(List<ChatMessage> messageList, UserInfo userInfo, int maxTokens, double temperature) throws Exception {
         OpenAiService service = new OpenAiService(token, Duration.ofSeconds(30));
         ChatCompletionRequest request = ChatCompletionRequest.builder()
         .model(model)
@@ -46,12 +53,18 @@ public class ChatGptRepository {
             } catch (OpenAiHttpException e) {
                 if(retryCount == maxRetry) {
                     response = "エラーが発生しました！繰り返す場合は管理者にご連絡ください！";
+                    e.printStackTrace();
                     break;
                 } else {
+                    if(retryCount == 2) {
+                        lineMessageService.pushLineMesage(userInfo.getLineUserId(), ".。o(読み込み中)");
+                    }
                     Thread.sleep(retrySleepMs);
                     retryCount++;
+                    continue;
                 }
             }
+            break;
         }
         service.shutdownExecutor();
         return response;

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.linecorp.bot.client.LineMessagingClient;
+import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.model.response.BotApiResponse;
@@ -19,5 +20,9 @@ public class LineMessageService {
     public BotApiResponse replyLineMessage(String replyToken, String replyMessage) throws InterruptedException, ExecutionException {
         return lineMessagingClient.replyMessage(
             new ReplyMessage(replyToken, new TextMessage(replyMessage), true)).get();
-    }    
+    }
+
+    public BotApiResponse pushLineMesage(String lineUserId, String replyMessage) throws InterruptedException, ExecutionException {
+        return lineMessagingClient.pushMessage(new PushMessage(lineUserId, new TextMessage(replyMessage), true)).get();
+    }
 }
