@@ -30,13 +30,13 @@ public class GoogleCalendarService {
             // カレンダーIDが取得できない場合は作成する
             this.addCalendar(userInfo, googleUserInfo);
         }
-        Event event = googleCalendarRepository.requestGoogleCalendarRegisEvent(request, googleUserInfo);
+        Event event = googleCalendarRepository.requestRegisEvent(request, googleUserInfo);
 
         return "以下で登録したよ！\nタイトル：".concat(event.getSummary()).concat("\n日付：").concat(event.getStart().getDate().toString());
     }
 
     private void addCalendar(UserInfo userInfo, GoogleUserInfo googleUserInfo) throws IOException, GeneralSecurityException {
-        Calendar calendar = googleCalendarRepository.requestGoogleCalendarAddCalendar(userInfo);
+        Calendar calendar = googleCalendarRepository.requestAddCalendar(userInfo);
             
         googleUserInfo.setUserId(userInfo.getUserId());
         googleUserInfo.setCalendarId(calendar.getId());

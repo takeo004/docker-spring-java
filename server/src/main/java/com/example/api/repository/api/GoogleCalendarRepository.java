@@ -10,6 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Repository;
 
 import com.example.api.controller.request.googlecalendar.GoogleCalendarRegistRequest;
+import com.example.api.controller.request.googlecalendar.GoogleCalendarSearchRequest;
 import com.example.api.entity.GoogleUserInfo;
 import com.example.api.entity.UserInfo;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -33,7 +34,7 @@ public class GoogleCalendarRepository {
     @Value("${google-calendar.file-name.credential}")
     public String credentialFileName;
 
-    public com.google.api.services.calendar.model.Calendar requestGoogleCalendarAddCalendar(UserInfo userInfo) throws IOException, GeneralSecurityException {
+    public com.google.api.services.calendar.model.Calendar requestAddCalendar(UserInfo userInfo) throws IOException, GeneralSecurityException {
         Calendar service = this.generateService();
 
         return service.calendars().insert(new com.google.api.services.calendar.model.Calendar()
@@ -42,7 +43,7 @@ public class GoogleCalendarRepository {
             .setTimeZone("Asia/Tokyo")).execute();
     }
     
-    public Event requestGoogleCalendarRegisEvent(GoogleCalendarRegistRequest request, GoogleUserInfo googleUserInfo) throws FileNotFoundException, IOException, GeneralSecurityException {
+    public Event requestRegisEvent(GoogleCalendarRegistRequest request, GoogleUserInfo googleUserInfo) throws FileNotFoundException, IOException, GeneralSecurityException {
         Calendar service = this.generateService();        
 
         EventDateTime startDateTime = new EventDateTime().setDate(new DateTime(request.getStartDate()));
@@ -55,9 +56,15 @@ public class GoogleCalendarRepository {
 
         return service.events().insert(googleUserInfo.getCalendarId(), event).execute();
     }
+    
+        public void searchCalendarEvent(GoogleUserInfo googleUserInfo, GoogleCalendarSearchRequest request) throws IOException, GeneralSecurityException {
+            Calendar service = this.generateService();
+    
+            // service.geteven
+        }
 
     public void addCalendarRole(GoogleUserInfo googleUserInfo, String userEmail) throws IOException, GeneralSecurityException {
-        Calendar service = generateService();
+        Calendar service = this.generateService();
         System.out.println(service.calendarList().list().execute().toPrettyString());
 
         Scope scope = new Scope().setType("user").setValue(userEmail);
