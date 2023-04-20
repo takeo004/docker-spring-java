@@ -42,11 +42,20 @@ public class GoogleCalendarService {
             .append(convertHaihunToSlash(request.getStartDate()))
             .append("~")
             .append(convertHaihunToSlash(request.getEndDate()))
-            .append("で検索したよ！\n\n");
+            .append("で検索したよ！");
 
         GoogleUserInfo googleUserInfo = this.getGoogleUserInfo(userInfo);
         List<Event> eventList = googleCalendarRepository.requestSearchEvent(googleUserInfo, request);
 
+        this.generateSearchResponse(response, eventList);
+        return response.toString();
+    }
+
+    private String convertHaihunToSlash(String target) {
+        return target.replace("-", "/");
+    }
+
+    private void generateSearchResponse(StringBuilder response, List<Event> eventList) {
         if(eventList.isEmpty()) {
             response.append("予定は無かったよ！");
         } else {
@@ -67,26 +76,19 @@ public class GoogleCalendarService {
 
             eventMap.entrySet().stream()
                 .forEach(entry -> {
-                    response.append("日付：")
-                        .append(convertHaihunToSlash(entry.getKey()))
-                        .append("\n");
+                    response.append("\n\n日付：")
+                        .append(convertHaihunToSlash(entry.getKey()));
                     
                     AtomicInteger index = new AtomicInteger();
                     entry.getValue().stream()
                         .forEach(event -> {
-                            response.append(index.incrementAndGet())
+                            response.append("\n")
+                                .append(index.incrementAndGet())
                                 .append(". ")
-                                .append(event)
-                                .append("\n");
+                                .append(event);
                         });
-                    response.append("\n");
                 });
         }
-        return response.toString();
-    }
-
-    private String convertHaihunToSlash(String target) {
-        return target.replace("-", "/");
     }
 
     private GoogleUserInfo getGoogleUserInfo(UserInfo userInfo) throws IOException, GeneralSecurityException {
