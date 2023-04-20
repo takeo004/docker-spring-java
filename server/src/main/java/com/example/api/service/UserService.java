@@ -5,8 +5,10 @@ import org.springframework.stereotype.Service;
 
 import com.example.api.entity.UserInfo;
 import com.example.api.entity.UserInitState;
+import com.example.api.entity.UserState;
 import com.example.api.repository.db.UserInfoRepository;
 import com.example.api.repository.db.UserInitStateRepository;
+import com.example.api.repository.db.UserStateRepository;
 
 @Service
 public class UserService {
@@ -14,9 +16,15 @@ public class UserService {
     private UserInfoRepository userRepository;
     @Autowired
     private UserInitStateRepository userInitStateRepository;
+    @Autowired
+    private UserStateRepository userStateRepository;
 
     public UserInfo findUserByLineUserId(String lineUserId) {
         return userRepository.findByLineUserId(lineUserId);
+    }
+
+    public UserState findUserStateByUserId(int userId) {
+        return userStateRepository.findById(userId).orElse(null);
     }
 
     public String initUser(String lineUserId, String message) {
