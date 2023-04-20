@@ -1,8 +1,11 @@
 package com.example.api.service;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +15,7 @@ import com.example.api.constant.State;
 import com.example.api.entity.GoogleUserInfo;
 import com.example.api.entity.UserInfo;
 import com.example.api.entity.UserState;
+import com.example.api.repository.api.GoogleCalendarRepository;
 import com.example.api.repository.db.GoogleUserInfoRepository;
 import com.example.api.repository.db.UserInfoRepository;
 import com.example.api.repository.db.UserStateRepository;
@@ -21,6 +25,8 @@ public class AdminService {
 
     @Autowired
     private ChatGptService chatGptService;
+    @Autowired
+    private GoogleCalendarService googleCalendarService;
 
     @Autowired
     private UserInfoRepository userInfoRepository;
@@ -37,8 +43,10 @@ public class AdminService {
             return generateHelpMessage();
         } else if (message.startsWith(AdminProcess.CREATE_USER.getPrefix())) {
             response = this.createUser(message);
-        } else if (message.startsWith(AdminProcess.SET_CALENDER_ID.getPrefix())) {
+        } else if (message.startsWith(AdminProcess.SET_CALENDAR_ID.getPrefix())) {
             response = this.setCalenderId(message, adminUserInfo);
+        } else if (message.startsWith(AdminProcess.ADD_CALENDAR_ROLE.getPrefix())) {
+            response = this.addCalendarRole(message, adminUserInfo);
         }
         return response;        
     }
@@ -67,7 +75,7 @@ public class AdminService {
 
     public String setCalenderId(String message, UserInfo userInfo, UserState userState) throws Exception {
 
-        if(userState != null && !chatGptService.messageIsYes(message)) {
+        if(userState != null && !chatGptService.messageIsYes(message, userInfo)) {
             userStateRepository.delete(userState);
             return "承知しました！処理を中断します！";
         }
@@ -75,11 +83,11 @@ public class AdminService {
         String userName;
         String calenderId;
         if(userState == null) {
-            message = message.replace(AdminProcess.SET_CALENDER_ID.getPrefix(), "");
+            message = message.replace(AdminProcess.SET_CALENDAR_ID.getPrefix(), "");
             List<String> commands = Arrays.asList(message.split(" "));
     
             if(commands.size() != 2) {
-                return "コマンドに不備があります。".concat(AdminProcess.SET_CALENDER_ID.getPrefix()).concat("[username] [calenderId]");
+                return "コマンドに不備があります。".concat(AdminProcess.SET_CALENDAR_ID.getDescription());
             }
             userName = commands.get(0);
             calenderId = commands.get(1);
@@ -91,7 +99,7 @@ public class AdminService {
 
         UserInfo targetUserInfo = userInfoRepository.findByUserName(userName);
         if(targetUserInfo == null) {
-            return "存在しないusernameです。";
+            return "存在しないユーザー名です。";
         }
         
         GoogleUserInfo googleUserInfo = googleUserInfoRepository.findById(targetUserInfo.getUserId()).orElse(new GoogleUserInfo());
@@ -113,5 +121,24 @@ public class AdminService {
             userStateRepository.delete(userState);
         }
         return "カレンダーIDの登録が完了しました！";
+    }
+
+    private String addCalendarRole(String message, UserInfo userInfo) throws IOException, GeneralSecurityException {
+        message = message.replace(AdminProcess.ADD_CALENDAR_ROLE.getPrefix(), "");
+        List<String> commands = Arrays.asList(message.split(" "));
+        
+        if(commands.size() != 2) {
+            return "コマンドに不備があります。".concat(AdminProcess.ADD_CALENDAR_ROLE.getDescription());
+        }
+
+        String userName = commands.get(0);
+        String userEmail = commands.get(1);
+
+        UserInfo targetUserInfo = userInfoRepository.findByUserName(userName);
+        if(targetUserInfo == null) {
+            return "存在しないユーザー名です。";
+        }
+
+        return googleCalendarService.addCalendarRole(targetUserInfo, userEmail);
     }
 }

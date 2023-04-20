@@ -73,7 +73,7 @@ public class LineMessageWebhookHandler {
             }
 
             // chatGPTをつかって、メッセージから処理内容を判定
-            String chatGptResponse = chatGptService.checkMethodForrequestMessage(message.getText());
+            String chatGptResponse = chatGptService.checkMethodForrequestMessage(message.getText(), userInfo);
             
             MethodDetailType type = this.generateRequestMethod(chatGptResponse);
             if(type == null) {

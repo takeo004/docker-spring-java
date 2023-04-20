@@ -6,8 +6,9 @@ import lombok.Getter;
 public enum AdminProcess {
     
     HELP("--help", "--help"),
-    CREATE_USER("--create-user ", "--create-user [userName]"),
-    SET_CALENDER_ID("--set-calender-id ", "--set-calender-id [userName] [calenderId]"),
+    CREATE_USER("--create-user ", "--create-user [ユーザー名]"),
+    SET_CALENDAR_ID("--set-calendar-id ", "--set-calendar-id [ユーザー名] [カレンダーID]"),
+    ADD_CALENDAR_ROLE("--add-calendar-role ", "--add-calendar-role [ユーザー名] [参照できるようにしたgoogleアカウントのアドレス]"),
     ;
 
     private String prefix;
