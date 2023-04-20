@@ -5,7 +5,6 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +14,6 @@ import com.example.api.constant.State;
 import com.example.api.entity.GoogleUserInfo;
 import com.example.api.entity.UserInfo;
 import com.example.api.entity.UserState;
-import com.example.api.repository.api.GoogleCalendarRepository;
 import com.example.api.repository.db.GoogleUserInfoRepository;
 import com.example.api.repository.db.UserInfoRepository;
 import com.example.api.repository.db.UserStateRepository;

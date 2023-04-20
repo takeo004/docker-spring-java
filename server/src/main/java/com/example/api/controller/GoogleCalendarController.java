@@ -8,13 +8,12 @@ import org.springframework.stereotype.Controller;
 
 import com.example.api.constant.MethodDetailType;
 import com.example.api.controller.request.googlecalendar.GoogleCalendarRegistRequest;
-import com.example.api.controller.request.googlecalendar.GoogleCalendarRequestBase;
 import com.example.api.controller.request.googlecalendar.GoogleCalendarSearchRequest;
 import com.example.api.entity.UserInfo;
 import com.example.api.service.GoogleCalendarService;
 
 @Controller
-public class GoogleCalendarController<T extends GoogleCalendarRequestBase> extends BaseController<T> {
+public class GoogleCalendarController extends BaseController {
 
     @Autowired
     private GoogleCalendarService googleCalendarService;
