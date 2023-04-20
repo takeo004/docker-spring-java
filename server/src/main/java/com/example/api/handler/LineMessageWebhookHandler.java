@@ -1,4 +1,4 @@
-package com.example.api;
+package com.example.api.handler;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -11,7 +11,6 @@ import com.example.api.constant.MethodDetailType;
 import com.example.api.constant.MethodType;
 import com.example.api.entity.UserInfo;
 import com.example.api.entity.UserState;
-import com.example.api.handler.ProcessContinueHandler;
 import com.example.api.service.AdminService;
 import com.example.api.service.ChatGptService;
 import com.example.api.service.LineMessageService;

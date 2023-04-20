@@ -14,7 +14,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
  * @see com.example.api.constant.MethodType
  * @see com.example.api.constant.MethodDetailType
  * 
- * {@link com.example.api.LineMessageWebhookHandler} でリフレクションしているのだけど、少し無理やり感が強いからほかの方法があれば修正。。
+ * {@link com.example.api.handler.LineMessageWebhookHandler} でリフレクションしているのだけど、少し無理やり感が強いからほかの方法があれば修正。。
  */
 @SuppressWarnings("unchecked")
 public abstract class BaseController<T extends LineRequestBase> {
