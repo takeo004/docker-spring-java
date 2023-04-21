@@ -1,6 +1,5 @@
 package com.example.api.repository.api;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
