@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.example.api.constant.MethodDetailType;
 import com.example.api.constant.MethodType;
+import com.example.api.controller.ProcessContinueController;
 import com.example.api.entity.UserInfo;
 import com.example.api.entity.UserState;
 import com.example.api.service.AdminService;
@@ -31,7 +32,7 @@ public class LineMessageWebhookHandler {
     private ApplicationContext context;
     
     @Autowired
-    private ProcessContinueHandler continueHandler;
+    private ProcessContinueController continueController;
     @Autowired
     private LineMessageService lineMessageService;
     @Autowired
@@ -57,7 +58,7 @@ public class LineMessageWebhookHandler {
             UserState userState = userService.findUserStateByUserId(userInfo.getUserId());
             if(userState != null) {
                 // 中断中の処理がある場合は、中断中の処理を再開する
-                lineMessageService.replyLineMessage(event.getReplyToken(), continueHandler.handleContinueProcess(userInfo, userState, message.getText()));
+                lineMessageService.replyLineMessage(event.getReplyToken(), continueController.handleContinueProcess(userInfo, userState, message.getText()));
                 return;
             }
 
