@@ -9,6 +9,7 @@ public enum AdminProcess {
     CREATE_USER("--create-user ", "--create-user [ユーザー名]"),
     SET_CALENDAR_ID("--set-calendar-id ", "--set-calendar-id [ユーザー名] [カレンダーID]"),
     ADD_CALENDAR_ROLE("--add-calendar-role ", "--add-calendar-role [ユーザー名] [参照できるようにしたgoogleアカウントのアドレス]"),
+    USERS("--users", "--users"),
     ;
 
     private String prefix;

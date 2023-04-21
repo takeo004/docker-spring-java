@@ -34,13 +34,15 @@ public class AdminService {
         if(!adminUserInfo.isAdminFlg()) {
             return response;
         } else if(message.startsWith(AdminProcess.HELP.getPrefix())) {
-            return generateHelpMessage();
+            return this.generateHelpMessage();
         } else if (message.startsWith(AdminProcess.CREATE_USER.getPrefix())) {
             response = this.createUser(message);
         } else if (message.startsWith(AdminProcess.SET_CALENDAR_ID.getPrefix())) {
             response = this.setCalenderId(message, adminUserInfo);
         } else if (message.startsWith(AdminProcess.ADD_CALENDAR_ROLE.getPrefix())) {
             response = this.addCalendarRole(message, adminUserInfo);
+        } else if (message.startsWith(AdminProcess.USERS.getPrefix())) {
+            response = this.generateUserList();
         }
         return response;        
     }
@@ -124,5 +126,13 @@ public class AdminService {
         }
 
         return googleCalendarService.addCalendarRole(targetUserInfo, userEmail);
+    }
+
+    private String generateUserList() {
+        StringBuilder response = new StringBuilder();
+        List<UserInfo> userList = userInfoRepository.findAll();
+        response.append(userList.size()).append("名");
+        userList.forEach(user -> response.append("\n・").append(user.getUserName()));
+        return response.toString();
     }
 }
