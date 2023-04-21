@@ -13,8 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.api.controller.request.googlecalendar.GoogleCalendarRegistRequest;
-import com.example.api.controller.request.googlecalendar.GoogleCalendarSearchRequest;
+import com.example.api.controller.request.googlecalendar.GoogleCalendarRequest;
 import com.example.api.entity.GoogleUserInfo;
 import com.example.api.entity.UserInfo;
 import com.example.api.repository.api.GoogleCalendarRepository;
@@ -30,14 +29,14 @@ public class GoogleCalendarService {
     @Autowired
     private GoogleCalendarRepository googleCalendarRepository;
     
-    public String registSchedule(GoogleCalendarRegistRequest request, UserInfo userInfo) throws FileNotFoundException, IOException, GeneralSecurityException {
+    public String registSchedule(GoogleCalendarRequest request, UserInfo userInfo) throws FileNotFoundException, IOException, GeneralSecurityException {
         GoogleUserInfo googleUserInfo = this.getGoogleUserInfo(userInfo);
         Event event = googleCalendarRepository.requestRegisEvent(request, googleUserInfo);
 
         return "以下で登録したよ！\nタイトル：".concat(event.getSummary()).concat("\n日付：").concat(this.convertHaihunToSlash(event.getStart().getDate().toString()));
     }
 
-    public String searchSchedule(GoogleCalendarSearchRequest request, UserInfo userInfo) throws IOException, GeneralSecurityException {
+    public String searchSchedule(GoogleCalendarRequest request, UserInfo userInfo) throws IOException, GeneralSecurityException {
         StringBuilder response = new StringBuilder()
             .append(convertHaihunToSlash(request.getStartDate()))
             .append("~")
@@ -100,12 +99,42 @@ public class GoogleCalendarService {
 
         return googleUserInfo;
     }
+
     private void addCalendar(UserInfo userInfo, GoogleUserInfo googleUserInfo) throws IOException, GeneralSecurityException {
         Calendar calendar = googleCalendarRepository.requestAddCalendar(userInfo);
             
         googleUserInfo.setUserId(userInfo.getUserId());
         googleUserInfo.setCalendarId(calendar.getId());
         googleUserInfoRepository.save(googleUserInfo);
+    }
+
+    public String deleteSchedule(GoogleCalendarRequest request, UserInfo userInfo) {
+        StringBuilder response = new StringBuilder();
+
+        GoogleUserInfo googleUserInfo = googleUserInfoRepository.findById(userInfo.getUserId()).orElse(null);
+        List<Event> eventList = null;
+        if(googleUserInfo != null) {
+            
+        }
+        if(googleUserInfo == null) {
+            response.append("以下で検索したけど対象の予定は見つからなかったよ！");
+            if(request.getStartDate() != null) {
+                response.append("\n日付：")
+                .append(convertHaihunToSlash(request.getStartDate()))
+                .append("~")
+                .append(convertHaihunToSlash(request.getEndDate()))
+                .append("\n");
+            }
+            if(request.getTitle() != null) {
+                response.append("\nタイトル：")
+                    .append(request.getTitle());
+            }
+            return response.toString();
+        }
+
+        
+
+        return response.toString();
     }
 
     public String addCalendarRole(UserInfo userInfo, String userEmail) throws IOException, GeneralSecurityException {

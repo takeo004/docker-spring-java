@@ -2,6 +2,7 @@ package com.example.api.repository.api;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
@@ -10,8 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Repository;
 
-import com.example.api.controller.request.googlecalendar.GoogleCalendarRegistRequest;
-import com.example.api.controller.request.googlecalendar.GoogleCalendarSearchRequest;
+import com.example.api.controller.request.googlecalendar.GoogleCalendarRequest;
 import com.example.api.entity.GoogleUserInfo;
 import com.example.api.entity.UserInfo;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -24,7 +24,6 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
-import com.google.api.services.calendar.model.Events;
 import com.google.api.services.calendar.model.AclRule.Scope;
 import com.google.auth.Credentials;
 import com.google.auth.appengine.AppEngineCredentials;
@@ -45,7 +44,7 @@ public class GoogleCalendarRepository {
             .setTimeZone("Asia/Tokyo")).execute();
     }
     
-    public Event requestRegisEvent(GoogleCalendarRegistRequest request, GoogleUserInfo googleUserInfo) throws FileNotFoundException, IOException, GeneralSecurityException {
+    public Event requestRegisEvent(GoogleCalendarRequest request, GoogleUserInfo googleUserInfo) throws FileNotFoundException, IOException, GeneralSecurityException {
         Calendar service = this.generateService();        
 
         EventDateTime startDateTime = new EventDateTime().setDate(new DateTime(request.getStartDate()));
@@ -59,18 +58,34 @@ public class GoogleCalendarRepository {
         return service.events().insert(googleUserInfo.getCalendarId(), event).execute();
     }
     
-        public List<Event> requestSearchEvent(GoogleUserInfo googleUserInfo, GoogleCalendarSearchRequest request) throws IOException, GeneralSecurityException {
-            Calendar service = this.generateService();
-    
-            Events events = service.events().list(googleUserInfo.getCalendarId())
-                .setOrderBy("startTime")
-                .setSingleEvents(true)
-                .setTimeMin(new DateTime(request.getStartDate() + "T00:00:00Z"))
-                .setTimeMax(new DateTime(request.getEndDate() + "T23:59:59Z"))
-                .execute();
+    public List<Event> requestSearchEvent(GoogleUserInfo googleUserInfo, GoogleCalendarRequest request) throws IOException, GeneralSecurityException {
+        Calendar service = this.generateService();
+        return this.searchEvent(googleUserInfo, request, service);
+    }
 
-            return events.getItems();
-        }
+    public void requestDeleteEvent(GoogleUserInfo googleUserInfo, GoogleCalendarRequest request) throws IOException, GeneralSecurityException {
+        Calendar service = this.generateService();
+
+        List<Event> eventList = this.searchEvent(googleUserInfo, request, service);
+        eventList.stream()
+            .forEach(event -> {
+                try {
+                    service.events().delete(googleUserInfo.getCalendarId(), event.getId());
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+    }
+
+    private List<Event> searchEvent(GoogleUserInfo googleUserInfo, GoogleCalendarRequest request, Calendar service) throws IOException {
+        return service.events().list(googleUserInfo.getCalendarId())
+        .setOrderBy("startTime")
+        .setSingleEvents(true)
+        .setTimeMin(new DateTime(request.getStartDate() + "T00:00:00Z"))
+        .setTimeMax(new DateTime(request.getEndDate() + "T23:59:59Z"))
+        .execute()
+        .getItems();
+    }
 
     public void addCalendarRole(GoogleUserInfo googleUserInfo, String userEmail) throws IOException, GeneralSecurityException {
         Calendar service = this.generateService();

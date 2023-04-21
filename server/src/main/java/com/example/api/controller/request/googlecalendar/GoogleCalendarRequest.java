@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class GoogleCalendarRequestBase extends LineRequestBase {
+public class GoogleCalendarRequest extends LineRequestBase {
     
     /**
      * 予定開始日
@@ -19,4 +19,9 @@ public class GoogleCalendarRequestBase extends LineRequestBase {
      * 予定終了日
      */
     private String endDate;
+
+    /**
+     * タイトル
+     */
+    private String title;
 }
