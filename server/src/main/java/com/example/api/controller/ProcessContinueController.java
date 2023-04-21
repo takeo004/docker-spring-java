@@ -1,15 +1,16 @@
-package com.example.api.handler;
+package com.example.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import com.example.api.constant.State;
 import com.example.api.entity.UserInfo;
 import com.example.api.entity.UserState;
 import com.example.api.service.AdminService;
 import com.example.api.service.ChatGptService;
-@Component
-public class ProcessContinueHandler {
+
+@Controller
+public class ProcessContinueController extends BaseController {
     
     @Autowired
     private AdminService adminService;
