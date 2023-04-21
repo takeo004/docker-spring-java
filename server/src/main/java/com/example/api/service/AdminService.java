@@ -73,11 +73,6 @@ public class AdminService {
 
     public String setCalenderId(String message, UserInfo userInfo, UserState userState) throws Exception {
 
-        if(userState != null && !chatGptService.messageIsYes(message, userInfo)) {
-            userStateRepository.delete(userState);
-            return "承知しました！処理を中断します！";
-        }
-
         String userName;
         String calenderId;
         if(userState == null) {
