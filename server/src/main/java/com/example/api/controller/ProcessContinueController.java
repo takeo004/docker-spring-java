@@ -24,7 +24,7 @@ public class ProcessContinueController extends BaseController {
     @Autowired
     private AdminService adminService;
 
-    private static final String notContinueResponse = "承知しました！処理を中断します";
+    private static final String notContinueResponse = "直前の処理を中断します！";
 
     public String handleContinueProcess(UserInfo userInfo, UserState userState, String message) throws Exception {
         State state = State.of(userState.getState(), userState.getStateDetail());
@@ -39,7 +39,7 @@ public class ProcessContinueController extends BaseController {
                     ? googleCalendarService.deleteSchedule(super.generateRequest(GoogleCalendarRequest.class, userState.getNote()), userInfo, userState) : notContinueResponse;
                 break;
             default:
-                response = "エラーが発生したよ！管理者に連絡してね！";
+                response = "エラーが発生しました！管理者に連絡してください！";
         }
 
         userService.deleteUserState(userState);

@@ -40,7 +40,7 @@ public class GoogleCalendarService {
         GoogleUserInfo googleUserInfo = this.getGoogleUserInfo(userInfo);
         Event event = googleCalendarRepository.requestRegisEvent(googleUserInfo.getCalendarId(), request.getStartDate(), request.getEndDate(), request.getTitle());
 
-        return "以下で登録したよ！\nタイトル：".concat(event.getSummary()).concat("\n日付：").concat(this.convertHaihunToSlash(event.getStart().getDate().toString()));
+        return "以下で登録しました！\nタイトル：".concat(event.getSummary()).concat("\n日付：").concat(this.convertHaihunToSlash(event.getStart().getDate().toString()));
     }
 
     public String searchSchedule(GoogleCalendarRequest request, UserInfo userInfo) throws IOException, GeneralSecurityException {
@@ -48,11 +48,11 @@ public class GoogleCalendarService {
             .append(convertHaihunToSlash(request.getStartDate()))
             .append("~")
             .append(convertHaihunToSlash(request.getEndDate()))
-            .append("で検索したよ！");
+            .append("で検索しました！");
 
         GoogleUserInfo googleUserInfo = this.getGoogleUserInfo(userInfo);
         if(googleUserInfo == null) {
-            response.append("\n予定は無かったよ！");
+            response.append("\n予定はありませんでした！");
             return response.toString();
         }
 
@@ -68,7 +68,7 @@ public class GoogleCalendarService {
 
     private void generateSearchResponse(StringBuilder response, List<Event> eventList) {
         if(eventList.isEmpty()) {
-            response.append("\n予定は無かったよ！");
+            response.append("\n予定はありませんでした！");
         } else {
             Map<String, List<String>> eventMap = new LinkedHashMap<>();
             eventList.stream()
@@ -129,7 +129,7 @@ public class GoogleCalendarService {
             eventList = googleCalendarRepository.requestSearchEvent(googleUserInfo.getCalendarId(), request.getStartDate(), request.getEndDate(), request.getTitle());
         }
         if(eventList == null || eventList.isEmpty()) {
-            response.append("以下で検索したけど対象の予定は見つからなかったよ！");
+            response.append("以下で検索したけど対象の予定は見つかりませんでした！");
             if(StringUtils.hasText(request.getStartDate())) {
                 response.append("\n日付：")
                 .append(convertHaihunToSlash(request.getStartDate()))
@@ -169,6 +169,6 @@ public class GoogleCalendarService {
         }
 
         googleCalendarRepository.addCalendarRole(googleUserInfo.get().getCalendarId(), userEmail);;
-        return userInfo.getUserName().concat("のカレンダーが以下のGoogleアカウントから見れるようになったよ！\n".concat(userEmail));
+        return userInfo.getUserName().concat("のカレンダーが以下のGoogleアカウントから見れるようになりました！\n".concat(userEmail));
     }
 }
