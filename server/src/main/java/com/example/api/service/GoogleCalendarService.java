@@ -12,12 +12,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import com.example.api.constant.State;
 import com.example.api.controller.request.googlecalendar.GoogleCalendarRequest;
 import com.example.api.entity.GoogleUserInfo;
 import com.example.api.entity.UserInfo;
+import com.example.api.entity.UserState;
 import com.example.api.repository.api.GoogleCalendarRepository;
 import com.example.api.repository.db.GoogleUserInfoRepository;
+import com.example.api.repository.db.UserStateRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 
@@ -25,13 +30,15 @@ import com.google.api.services.calendar.model.Event;
 public class GoogleCalendarService {
 
     @Autowired
+    private UserStateRepository userStateRepository;
+    @Autowired
     private GoogleUserInfoRepository googleUserInfoRepository;
     @Autowired
     private GoogleCalendarRepository googleCalendarRepository;
     
     public String registSchedule(GoogleCalendarRequest request, UserInfo userInfo) throws FileNotFoundException, IOException, GeneralSecurityException {
         GoogleUserInfo googleUserInfo = this.getGoogleUserInfo(userInfo);
-        Event event = googleCalendarRepository.requestRegisEvent(request, googleUserInfo);
+        Event event = googleCalendarRepository.requestRegisEvent(googleUserInfo.getCalendarId(), request.getStartDate(), request.getEndDate(), request.getTitle());
 
         return "以下で登録したよ！\nタイトル：".concat(event.getSummary()).concat("\n日付：").concat(this.convertHaihunToSlash(event.getStart().getDate().toString()));
     }
@@ -44,7 +51,12 @@ public class GoogleCalendarService {
             .append("で検索したよ！");
 
         GoogleUserInfo googleUserInfo = this.getGoogleUserInfo(userInfo);
-        List<Event> eventList = googleCalendarRepository.requestSearchEvent(googleUserInfo, request);
+        if(googleUserInfo == null) {
+            response.append("\n予定は無かったよ！");
+            return response.toString();
+        }
+
+        List<Event> eventList = googleCalendarRepository.requestSearchEvent(googleUserInfo.getCalendarId(), request.getStartDate(), request.getEndDate());
 
         this.generateSearchResponse(response, eventList);
         return response.toString();
@@ -56,7 +68,7 @@ public class GoogleCalendarService {
 
     private void generateSearchResponse(StringBuilder response, List<Event> eventList) {
         if(eventList.isEmpty()) {
-            response.append("予定は無かったよ！");
+            response.append("\n予定は無かったよ！");
         } else {
             Map<String, List<String>> eventMap = new LinkedHashMap<>();
             eventList.stream()
@@ -101,40 +113,53 @@ public class GoogleCalendarService {
     }
 
     private void addCalendar(UserInfo userInfo, GoogleUserInfo googleUserInfo) throws IOException, GeneralSecurityException {
-        Calendar calendar = googleCalendarRepository.requestAddCalendar(userInfo);
+        Calendar calendar = googleCalendarRepository.requestAddCalendar(userInfo.getUserName());
             
         googleUserInfo.setUserId(userInfo.getUserId());
         googleUserInfo.setCalendarId(calendar.getId());
         googleUserInfoRepository.save(googleUserInfo);
     }
 
-    public String deleteSchedule(GoogleCalendarRequest request, UserInfo userInfo) {
+    public String deleteSchedule(GoogleCalendarRequest request, UserInfo userInfo) throws IOException, GeneralSecurityException {
+        GoogleUserInfo googleUserInfo = googleUserInfoRepository.findById(userInfo.getUserId()).orElse(null);
         StringBuilder response = new StringBuilder();
 
-        GoogleUserInfo googleUserInfo = googleUserInfoRepository.findById(userInfo.getUserId()).orElse(null);
         List<Event> eventList = null;
         if(googleUserInfo != null) {
-            
+            eventList = googleCalendarRepository.requestSearchEvent(googleUserInfo.getCalendarId(), request.getStartDate(), request.getEndDate(), request.getTitle());
         }
-        if(googleUserInfo == null) {
+        if(eventList == null || eventList.isEmpty()) {
             response.append("以下で検索したけど対象の予定は見つからなかったよ！");
-            if(request.getStartDate() != null) {
+            if(StringUtils.hasText(request.getStartDate())) {
                 response.append("\n日付：")
                 .append(convertHaihunToSlash(request.getStartDate()))
                 .append("~")
-                .append(convertHaihunToSlash(request.getEndDate()))
-                .append("\n");
+                .append(convertHaihunToSlash(request.getEndDate()));
             }
-            if(request.getTitle() != null) {
+            if(StringUtils.hasText(request.getTitle())) {
                 response.append("\nタイトル：")
                     .append(request.getTitle());
             }
-            return response.toString();
+        } else {
+            response.append("以下の予定を削除してもよろしいですか？");
+            this.generateSearchResponse(response, eventList);
+            userStateRepository.save(new UserState(
+                userInfo.getUserId(),
+                State.DELETE_SCHEDULE_CONFIRM,
+                new ObjectMapper().writeValueAsString(request)));
         }
 
-        
 
         return response.toString();
+    }
+
+    public String deleteSchedule(GoogleCalendarRequest request, UserInfo userInfo, UserState userState) throws IOException, GeneralSecurityException {
+        GoogleUserInfo googleUserInfo = googleUserInfoRepository.findById(userInfo.getUserId()).orElse(null);
+
+        List<Event> eventList = googleCalendarRepository.requestSearchEvent(googleUserInfo.getCalendarId(), request.getStartDate(), request.getEndDate(), request.getTitle());
+        googleCalendarRepository.requestDeleteEvent(googleUserInfo.getCalendarId(), eventList);
+
+        return "削除しました！";
     }
 
     public String addCalendarRole(UserInfo userInfo, String userEmail) throws IOException, GeneralSecurityException {
@@ -143,7 +168,7 @@ public class GoogleCalendarService {
             return "対象のカレンダーが存在しません！";
         }
 
-        googleCalendarRepository.addCalendarRole(googleUserInfo.get(), userEmail);
+        googleCalendarRepository.addCalendarRole(googleUserInfo.get().getCalendarId(), userEmail);;
         return userInfo.getUserName().concat("のカレンダーが以下のGoogleアカウントから見れるようになったよ！\n".concat(userEmail));
     }
 }

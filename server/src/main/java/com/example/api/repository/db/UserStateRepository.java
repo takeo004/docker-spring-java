@@ -7,4 +7,5 @@ import com.example.api.entity.UserState;
 
 @Repository
 public interface UserStateRepository extends JpaRepository<UserState, Integer> {
+    UserState findByUserId(int userId);
 }

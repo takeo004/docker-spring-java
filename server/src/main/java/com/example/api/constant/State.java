@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum State {
     
     SET_CALENDER_ID_CONFIRM("1", "1"),
+    DELETE_SCHEDULE_CONFIRM("2", "1"),
     ;
 
     private String state;

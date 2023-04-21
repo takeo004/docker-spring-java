@@ -24,7 +24,11 @@ public class UserService {
     }
 
     public UserState findUserStateByUserId(int userId) {
-        return userStateRepository.findById(userId).orElse(null);
+        return userStateRepository.findByUserId(userId);
+    }
+
+    public void deleteUserState(UserState userState) {
+        userStateRepository.delete(userState);
     }
 
     public String initUser(String lineUserId, String message) {

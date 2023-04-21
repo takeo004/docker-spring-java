@@ -84,9 +84,9 @@ public class LineMessageWebhookHandler {
 
             // リフレクションでコントローラと対象のメソッドを呼び出す
             Object classes = context.getBean(type.getMethod().getControllerName());
-            Method method = classes.getClass().getMethod(type.getMethodName(), MethodDetailType.class, String.class, UserInfo.class);
+            Method method = classes.getClass().getMethod(type.getMethodName(), UserInfo.class, String.class);
 
-            String response = method.invoke(classes, type, chatGptResponse, userInfo).toString();
+            String response = method.invoke(classes, userInfo, chatGptResponse).toString();
             
             // コントローラの返却値をそのまま返信する
             lineMessageService.replyLineMessage(event.getReplyToken(), response);

@@ -3,7 +3,6 @@ package com.example.api.service;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +19,6 @@ import com.example.api.repository.db.UserStateRepository;
 
 @Service
 public class AdminService {
-
-    @Autowired
-    private ChatGptService chatGptService;
     @Autowired
     private GoogleCalendarService googleCalendarService;
 
@@ -99,10 +95,8 @@ public class AdminService {
         if(userState == null && googleUserInfo.getCalendarId() != null) {
             userStateRepository.save(new UserState(
                 userInfo.getUserId(),
-                State.SET_CALENDER_ID_CONFIRM.getState(),
-                State.SET_CALENDER_ID_CONFIRM.getDetail(),
-                targetUserInfo.getUserName().concat(",").concat(calenderId),
-                 new Date()));
+                State.SET_CALENDER_ID_CONFIRM,
+                targetUserInfo.getUserName().concat(",").concat(calenderId)));
             return "既にカレンダーIDが設定されていますが、上書きしてもよろしいですか？\nカレンダーID：" + googleUserInfo.getCalendarId();
         }
 
@@ -110,9 +104,6 @@ public class AdminService {
         googleUserInfo.setCalendarId(calenderId);
         googleUserInfoRepository.save(googleUserInfo);
 
-        if(userState != null) {
-            userStateRepository.delete(userState);
-        }
         return "カレンダーIDの登録が完了しました！";
     }
 
