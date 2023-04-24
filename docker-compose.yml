@@ -4,7 +4,7 @@ services:
     image: eclipse-temurin:17
     privileged: true # 最強権限らしいのでほかの方法が知りたい
     ports:
-      - 8080:8080
+      - 80:8080
     tty: true
     working_dir: /srv
     networks:
