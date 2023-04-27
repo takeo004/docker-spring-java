@@ -31,7 +31,7 @@ public class ChatGptRepository {
     public LineMessageService lineMessageService;
 
     public String requestChatGpt(List<ChatMessage> messageList, UserInfo userInfo) throws Exception {
-        return this.requestChatGpt(messageList, userInfo, 150, 1d);
+        return this.requestChatGpt(messageList, userInfo, 1024, 1d);
     }
     
     public String requestChatGpt(List<ChatMessage> messageList, UserInfo userInfo, int maxTokens, double temperature) throws Exception {
